@@ -1,0 +1,72 @@
+{% extends "task/base.html" %}
+
+{% block title %}{{ task.title }} - TaskBoard{% endblock %}
+{% block page_title %}Task Details{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="card detail-card">
+        <div class="detail-header">
+            <div class="detail-title-row">
+                <h2 class="detail-title {% if task.done %}done-text{% endif %}">{{ task.title }}</h2>
+                <div class="detail-actions">
+                    <a href="{% url 'task_edit' task.pk %}" class="btn btn-ghost btn-sm">
+                        <span class="material-symbols-rounded">edit</span> Edit
+                    </a>
+                    <a href="{% url 'task_delete' task.pk %}" class="btn btn-danger btn-sm">
+                        <span class="material-symbols-rounded">delete</span> Delete
+                    </a>
+                </div>
+            </div>
+            <div class="detail-badges">
+                <span class="badge badge-priority-{{ task.priority }}">{{ task.get_priority_display }} Priority</span>
+                <span class="badge badge-status-{{ task.status }}">{{ task.get_status_display }}</span>
+                <span class="badge badge-category">{{ task.get_category_display }}</span>
+                {% if task.done %}
+                <span class="badge badge-done">Completed</span>
+                {% endif %}
+                {% if task.is_overdue %}
+                <span class="badge badge-overdue">Overdue</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if task.description %}
+        <div class="detail-section">
+            <h3 class="detail-section-title">
+                <span class="material-symbols-rounded">description</span> Description
+            </h3>
+            <p class="detail-description">{{ task.description|linebreaksbr }}</p>
+        </div>
+        {% endif %}
+
+        <div class="detail-section">
+            <h3 class="detail-section-title">
+                <span class="material-symbols-rounded">info</span> Details
+            </h3>
+            <div class="detail-meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Created</span>
+                    <span class="meta-value">{{ task.created_at|date:"M d, Y H:i" }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Updated</span>
+                    <span class="meta-value">{{ task.updated_at|date:"M d, Y H:i" }}</span>
+                </div>
+                {% if task.due_date %}
+                <div class="meta-item">
+                    <span class="meta-label">Due Date</span>
+                    <span class="meta-value {% if task.is_overdue %}overdue{% endif %}">{{ task.due_date|date:"M d, Y H:i" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="detail-footer">
+            <a href="{% url 'task_list' %}" class="btn btn-ghost">
+                <span class="material-symbols-rounded">arrow_back</span> Back to Tasks
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "task/base.html" %}
+
+{% block title %}{{ title }} - TaskBoard{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="card form-card">
+        <form method="post" class="task-form" novalidate>
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="form-errors">
+                <span class="material-symbols-rounded">error</span>
+                <p>Please fix the errors below.</p>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}" class="form-label">
+                    <span class="material-symbols-rounded">title</span> Title
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <span class="field-error">{{ form.title.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}" class="form-label">
+                    <span class="material-symbols-rounded">description</span> Description
+                </label>
+                {{ form.description }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.priority.id_for_label }}" class="form-label">
+                        <span class="material-symbols-rounded">flag</span> Priority
+                    </label>
+                    {{ form.priority }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">
+                        <span class="material-symbols-rounded">info</span> Status
+                    </label>
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.category.id_for_label }}" class="form-label">
+                        <span class="material-symbols-rounded">category</span> Category
+                    </label>
+                    {{ form.category }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                        <span class="material-symbols-rounded">event</span> Due Date
+                    </label>
+                    {{ form.due_date }}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'task_list' %}" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-symbols-rounded">save</span>
+                    {% if task %}Update Task{% else %}Create Task{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

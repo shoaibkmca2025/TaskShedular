@@ -1,0 +1,136 @@
+{% extends "task/base.html" %}
+
+{% block title %}All Tasks - TaskBoard{% endblock %}
+{% block page_title %}All Tasks{% endblock %}
+
+{% block content %}
+<div class="task-list-page">
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+        <form method="get" class="filters-form" id="filterForm">
+            <div class="search-box">
+                <span class="material-symbols-rounded search-icon">search</span>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search tasks..." class="search-input" id="searchInput">
+            </div>
+            <div class="filter-group">
+                <select name="status" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    {% for val, label in status_choices %}
+                    <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                    <option value="overdue" {% if status_filter == "overdue" %}selected{% endif %}>Overdue</option>
+                </select>
+                <select name="priority" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">All Priority</option>
+                    {% for val, label in priority_choices %}
+                    <option value="{{ val }}" {% if priority_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select name="category" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for val, label in category_choices %}
+                    <option value="{{ val }}" {% if category_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if query or status_filter or priority_filter or category_filter %}
+            <a href="{% url 'task_list' %}" class="btn btn-ghost btn-sm">
+                <span class="material-symbols-rounded">filter_alt_off</span>
+                Clear
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Task Cards -->
+    <div class="task-cards" id="taskCards">
+        {% for task in tasks %}
+        <div class="task-card {% if task.done %}task-done{% endif %} {% if task.is_overdue %}task-overdue{% endif %} priority-{{ task.priority }}" data-id="{{ task.pk }}">
+            <div class="task-card-header">
+                <button class="toggle-btn {% if task.done %}checked{% endif %}" onclick="toggleTask({{ task.pk }})" title="Toggle done" aria-label="Toggle task completion">
+                    <span class="material-symbols-rounded">{% if task.done %}check_circle{% else %}radio_button_unchecked{% endif %}</span>
+                </button>
+                <div class="task-card-title-group">
+                    <a href="{% url 'task_detail' task.pk %}" class="task-title">{{ task.title }}</a>
+                    {% if task.description %}
+                    <p class="task-desc">{{ task.description|truncatewords:15 }}</p>
+                    {% endif %}
+                </div>
+                <div class="task-card-actions">
+                    <a href="{% url 'task_edit' task.pk %}" class="icon-btn" title="Edit">
+                        <span class="material-symbols-rounded">edit</span>
+                    </a>
+                    <a href="{% url 'task_delete' task.pk %}" class="icon-btn icon-btn-danger" title="Delete">
+                        <span class="material-symbols-rounded">delete</span>
+                    </a>
+                </div>
+            </div>
+            <div class="task-card-meta">
+                <span class="badge badge-priority-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                <span class="badge badge-status-{{ task.status }}">{{ task.get_status_display }}</span>
+                <span class="badge badge-category">{{ task.get_category_display }}</span>
+                {% if task.due_date %}
+                <span class="task-due {% if task.is_overdue %}overdue{% endif %}">
+                    <span class="material-symbols-rounded">schedule</span>
+                    {{ task.due_date|date:"M d, Y H:i" }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <span class="material-symbols-rounded empty-icon">inbox</span>
+            <h3>No tasks found</h3>
+            <p>{% if query or status_filter or priority_filter %}Try adjusting your filters.{% else %}Create your first task to get started!{% endif %}</p>
+            <a href="{% url 'task_create' %}" class="btn btn-primary">
+                <span class="material-symbols-rounded">add</span>
+                Create Task
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleTask(pk) {
+    fetch(`/tasks/${pk}/toggle/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+    })
+    .then(res => res.json())
+    .then(data => {
+        location.reload();
+    })
+    .catch(() => location.reload());
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Debounced search
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        document.getElementById('filterForm').submit();
+    }, 500);
+});
+</script>
+{% endblock %}

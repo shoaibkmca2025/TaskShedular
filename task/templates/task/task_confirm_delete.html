@@ -1,0 +1,28 @@
+{% extends "task/base.html" %}
+
+{% block title %}Delete Task - TaskBoard{% endblock %}
+{% block page_title %}Delete Task{% endblock %}
+
+{% block content %}
+<div class="delete-page">
+    <div class="card delete-card">
+        <div class="delete-icon-wrap">
+            <span class="material-symbols-rounded delete-big-icon">warning</span>
+        </div>
+        <h2 class="delete-heading">Are you sure?</h2>
+        <p class="delete-text">
+            You are about to permanently delete the task:<br>
+            <strong>"{{ task.title }}"</strong>
+        </p>
+        <p class="delete-subtext">This action cannot be undone.</p>
+        <form method="post" class="delete-actions">
+            {% csrf_token %}
+            <a href="{% url 'task_list' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-danger">
+                <span class="material-symbols-rounded">delete_forever</span>
+                Delete Permanently
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

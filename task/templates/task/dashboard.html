@@ -1,0 +1,118 @@
+{% extends "task/base.html" %}
+
+{% block title %}Dashboard - TaskBoard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-total">
+            <div class="stat-icon">
+                <span class="material-symbols-rounded">assignment</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">{{ total }}</span>
+                <span class="stat-label">Total Tasks</span>
+            </div>
+        </div>
+        <div class="stat-card stat-pending">
+            <div class="stat-icon">
+                <span class="material-symbols-rounded">pending_actions</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">{{ pending }}</span>
+                <span class="stat-label">Pending</span>
+            </div>
+        </div>
+        <div class="stat-card stat-done">
+            <div class="stat-icon">
+                <span class="material-symbols-rounded">task_alt</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">{{ done_count }}</span>
+                <span class="stat-label">Completed</span>
+            </div>
+        </div>
+        <div class="stat-card stat-overdue">
+            <div class="stat-icon">
+                <span class="material-symbols-rounded">warning</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">{{ overdue }}</span>
+                <span class="stat-label">Overdue</span>
+            </div>
+        </div>
+        <div class="stat-card stat-high">
+            <div class="stat-icon">
+                <span class="material-symbols-rounded">priority_high</span>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">{{ high_priority }}</span>
+                <span class="stat-label">High Priority</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Ring -->
+    <div class="dashboard-row">
+        <div class="card progress-card">
+            <h2 class="card-title">Completion Rate</h2>
+            <div class="progress-ring-container">
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
+                    <circle class="progress-ring-fill" cx="60" cy="60" r="52"
+                        stroke-dasharray="326.73"
+                        stroke-dashoffset="{% if total > 0 %}{{ total|add:"-"|add:done_count|stringformat:"s" }}{% else %}326.73{% endif %}"
+                        data-total="{{ total }}" data-done="{{ done_count }}" />
+                </svg>
+                <div class="progress-ring-label">
+                    <span class="progress-percent" data-total="{{ total }}" data-done="{{ done_count }}">
+                        {% if total > 0 %}{% widthratio done_count total 100 %}%{% else %}0%{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card category-card">
+            <h2 class="card-title">Tasks by Category</h2>
+            <div class="category-bars">
+                {% for stat in category_stats %}
+                <div class="category-bar-row">
+                    <span class="category-name">{{ category_labels|dictsort:stat.category }}{% for key, val in category_labels.items %}{% if key == stat.category %}{{ val }}{% endif %}{% endfor %}</span>
+                    <div class="category-bar-track">
+                        <div class="category-bar-fill cat-{{ stat.category }}" style="width: {% widthratio stat.count pending 100 %}%"></div>
+                    </div>
+                    <span class="category-count">{{ stat.count }}</span>
+                </div>
+                {% empty %}
+                <p class="empty-text">No pending tasks in any category.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card quick-actions-card">
+        <h2 class="card-title">Quick Actions</h2>
+        <div class="quick-actions">
+            <a href="{% url 'task_create' %}" class="quick-action">
+                <span class="material-symbols-rounded">add_task</span>
+                <span>Create Task</span>
+            </a>
+            <a href="{% url 'task_list' %}?status=overdue" class="quick-action">
+                <span class="material-symbols-rounded">alarm</span>
+                <span>View Overdue</span>
+            </a>
+            <a href="{% url 'task_list' %}?priority=H" class="quick-action">
+                <span class="material-symbols-rounded">bolt</span>
+                <span>High Priority</span>
+            </a>
+            <a href="{% url 'task_list' %}?status=in_progress" class="quick-action">
+                <span class="material-symbols-rounded">hourglass_top</span>
+                <span>In Progress</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
